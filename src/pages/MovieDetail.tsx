@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { movies } from '../lib/data';
 import { Movie } from '../lib/types';
-import { Play, Plus, Star, Calendar, Clock, ChevronLeft } from 'lucide-react';
+import { Play, Plus, Star, Calendar, Clock, ChevronLeft, Lock, ShieldCheck } from 'lucide-react';
 import { motion } from 'motion/react';
 import MovieRow from '../components/MovieRow';
+import { useAuth } from '../context/AuthContext';
 
 export default function MovieDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [movie, setMovie] = useState<Movie | null>(null);
 
   useEffect(() => {
@@ -24,6 +26,15 @@ export default function MovieDetail() {
   if (!movie) return null;
 
   const related = movies.filter(m => m.id !== movie.id).slice(0, 8);
+
+  const handleWatchNow = () => {
+    if (user?.isPremium) {
+      // Simulate player opening
+      alert("Enjoy the movie in 4K!");
+    } else {
+      navigate('/#pricing');
+    }
+  };
 
   return (
     <motion.div
@@ -79,8 +90,15 @@ export default function MovieDetail() {
              </div>
 
              <div className="flex gap-4 pt-4">
-                <button className="flex items-center gap-3 bg-netflix-red hover:bg-red-700 px-12 py-4 rounded-sm font-black transition-all uppercase tracking-widest text-sm">
-                  <Play size={18} fill="currentColor" /> Watch Now
+                <button 
+                  onClick={handleWatchNow}
+                  className="flex items-center gap-3 bg-netflix-red hover:bg-red-700 px-12 py-4 rounded-sm font-black transition-all uppercase tracking-widest text-sm"
+                >
+                  {user?.isPremium ? (
+                    <><Play size={18} fill="currentColor" /> Watch Now</>
+                  ) : (
+                    <><Lock size={18} /> Upgrade to Stream</>
+                  )}
                 </button>
                 <button className="flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md px-12 py-4 rounded-sm font-black transition-all border border-white/10 uppercase tracking-widest text-sm">
                   <Plus size={18} /> Add to Watchlist
@@ -89,6 +107,32 @@ export default function MovieDetail() {
           </div>
         </div>
       </div>
+
+      {/* Paywall Banner for non-premium */}
+      {!user?.isPremium && (
+        <motion.div 
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="max-w-5xl mx-auto px-10 mt-10"
+        >
+          <div className="bg-gradient-to-r from-netflix-red/20 to-transparent border border-netflix-red/30 p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="space-y-4 text-center md:text-left">
+               <div className="flex items-center justify-center md:justify-start gap-2 text-netflix-red">
+                 <ShieldCheck size={20} />
+                 <span className="uppercase font-black text-xs tracking-widest">Premium Content</span>
+               </div>
+               <h3 className="text-2xl font-display uppercase italic tracking-tighter">Unlock 4K Streaming</h3>
+               <p className="text-zinc-400 max-w-md">Streaming this title in Ultra HD requires a Premium subscription. Start your cinematic journey today.</p>
+            </div>
+            <button 
+              onClick={() => navigate('/#pricing')}
+              className="bg-white text-black px-10 py-4 rounded-sm font-black uppercase tracking-widest text-xs hover:bg-zinc-200 transition-all flex items-center gap-2"
+            >
+              See Pricing <ChevronLeft className="rotate-180" size={16} />
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Synopsis and More */}
       <div className="max-w-5xl mx-auto px-10 py-20 grid grid-cols-1 md:grid-cols-[1fr_300px] gap-20">

@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Play, Plus, Star, Calendar, Clock, Share2, Youtube } from 'lucide-react';
+import { X, Play, Plus, Star, Calendar, Clock, Share2, Youtube, Lock } from 'lucide-react';
 import { Movie } from '../lib/types';
 import { movies } from '../lib/data';
-import MovieCard from './MovieCard';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface MovieModalProps {
   movie: Movie | null;
@@ -11,9 +12,26 @@ interface MovieModalProps {
 }
 
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
   if (!movie) return null;
 
   const related = movies.filter(m => m.id !== movie.id).slice(0, 4);
+
+  const handleWatchNow = () => {
+    if (user?.isPremium) {
+      onClose();
+      navigate(`/movie/${movie.id}`);
+    } else {
+      // Smooth scroll to pricing
+      onClose();
+      setTimeout(() => {
+        const pricing = document.getElementById('pricing');
+        pricing?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -81,8 +99,15 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
                   </p>
 
                   <div className="flex flex-wrap items-center gap-4 pt-4">
-                    <button className="flex items-center gap-2 bg-netflix-red hover:bg-red-700 px-8 py-3 rounded-sm font-bold transition-all">
-                      <Play size={18} fill="currentColor" /> Watch Now
+                    <button 
+                      onClick={handleWatchNow}
+                      className="flex items-center gap-2 bg-netflix-red hover:bg-red-700 px-8 py-3 rounded-sm font-bold transition-all group"
+                    >
+                      {user?.isPremium ? (
+                        <><Play size={18} fill="currentColor" /> Watch Now</>
+                      ) : (
+                        <><Lock size={18} /> Upgrade to Watch</>
+                      )}
                     </button>
                     <button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-8 py-3 rounded-sm font-bold transition-all border border-white/5">
                       <Plus size={18} /> Add to Watchlist

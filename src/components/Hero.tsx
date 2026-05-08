@@ -2,9 +2,15 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Play, Info } from 'lucide-react';
 import { movies } from '../lib/data';
+import { useNavigate } from 'react-router-dom';
 
-export default function Hero() {
+interface HeroProps {
+  onAuthOpen: () => void;
+}
+
+export default function Hero({ onAuthOpen }: HeroProps) {
   const featured = movies[0];
+  const navigate = useNavigate();
 
   return (
     <section className="relative h-screen w-full flex items-center overflow-hidden">
@@ -45,10 +51,16 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="flex items-center gap-4"
         >
-          <button className="flex items-center gap-3 bg-white text-black px-10 py-4 rounded-sm font-bold hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 group">
+          <button 
+            onClick={onAuthOpen}
+            className="flex items-center gap-3 bg-white text-black px-10 py-4 rounded-sm font-bold hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 group"
+          >
             <Play fill="currentColor" /> Start Watching Free
           </button>
-          <button className="flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-10 py-4 rounded-sm font-bold transition-all border border-white/10">
+          <button 
+            onClick={() => navigate('/search')}
+            className="flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-10 py-4 rounded-sm font-bold transition-all border border-white/10"
+          >
             <Info /> Browse Catalogue
           </button>
         </motion.div>

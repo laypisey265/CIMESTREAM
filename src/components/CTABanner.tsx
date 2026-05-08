@@ -2,7 +2,11 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 
-export default function CTABanner() {
+interface CTABannerProps {
+  onAuthOpen: () => void;
+}
+
+export default function CTABanner({ onAuthOpen }: CTABannerProps) {
   return (
     <section className="py-24 px-10">
       <motion.div 
@@ -32,7 +36,10 @@ export default function CTABanner() {
                 placeholder="Enter your email" 
                 className="bg-white/10 backdrop-blur-md border border-white/20 px-8 py-5 rounded-sm flex-1 md:min-w-[300px] focus:outline-none focus:ring-2 ring-white/50 text-placeholder:white/50"
               />
-              <button className="bg-white text-netflix-red px-10 py-5 rounded-sm font-black uppercase tracking-widest text-sm hover:bg-zinc-100 transition-all flex items-center justify-center gap-2">
+              <button 
+                onClick={onAuthOpen}
+                className="bg-white text-netflix-red px-10 py-5 rounded-sm font-black uppercase tracking-widest text-sm hover:bg-zinc-100 transition-all flex items-center justify-center gap-2"
+              >
                 Get Started Free <ArrowRight size={18} />
               </button>
             </div>

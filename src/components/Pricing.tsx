@@ -3,12 +3,28 @@ import { Check, X, Calendar, Clock, Play } from 'lucide-react';
 import { pricingTiers } from '../lib/data';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
+import { useAuth } from '../context/AuthContext';
+import { PricingTier } from '../lib/types';
 
-export default function Pricing() {
+interface PricingProps {
+  onPlanSelect: (tier: PricingTier, isYearly: boolean) => void;
+  onAuthNeeded: () => void;
+}
+
+export default function Pricing({ onPlanSelect, onAuthNeeded }: PricingProps) {
   const [isYearly, setIsYearly] = useState(false);
+  const { user } = useAuth();
+
+  const handleAction = (tier: PricingTier) => {
+    if (!user) {
+      onAuthNeeded();
+      return;
+    }
+    onPlanSelect(tier, isYearly);
+  };
 
   return (
-    <section className="py-24 px-10 relative overflow-hidden">
+    <section className="py-24 px-10 relative overflow-hidden" id="pricing">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-netflix-red/5 blur-[120px] rounded-full -z-10"></div>
       
       <div className="max-w-7xl mx-auto text-center space-y-6 mb-16">
@@ -73,11 +89,14 @@ export default function Pricing() {
                 ))}
               </div>
 
-              <button className={cn(
-                "w-full py-4 rounded-sm font-bold transition-all uppercase tracking-widest text-xs",
-                tier.isPopular ? "bg-netflix-red hover:bg-red-700 text-white" : "bg-white/5 hover:bg-white/10 text-white border border-white/10"
-              )}>
-                Start Free Trial
+              <button 
+                onClick={() => handleAction(tier)}
+                className={cn(
+                  "w-full py-4 rounded-sm font-bold transition-all uppercase tracking-widest text-xs",
+                  tier.isPopular ? "bg-netflix-red hover:bg-red-700 text-white" : "bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                )}
+              >
+                {user?.isPremium && tier.id !== 'basic' ? 'Manage Plan' : 'Start Free Trial'}
               </button>
             </div>
           </motion.div>
